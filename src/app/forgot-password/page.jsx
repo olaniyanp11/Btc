@@ -8,11 +8,11 @@ import Link from "next/link";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
 
@@ -21,7 +21,6 @@ export default function ForgotPasswordPage() {
       return;
     }
 
-    // simple email regex
     if (!/^\S+@\S+\.\S+$/.test(email)) {
       setError("Please enter a valid email address.");
       return;
@@ -29,12 +28,11 @@ export default function ForgotPasswordPage() {
 
     setLoading(true);
     try {
-      // TODO: Replace with real API call
+      // Simulate API call
       await new Promise((r) => setTimeout(r, 1000));
 
-      // Show modal confirmation
       setShowModal(true);
-    } catch (err: any) {
+    } catch (err) {
       setError(err?.message || "Something went wrong. Try again.");
     } finally {
       setLoading(false);
@@ -48,14 +46,14 @@ export default function ForgotPasswordPage() {
         Forgot Password
       </h1>
       <Image
-        src={"/images/image.svg"}
+        src="/images/image.svg"
         alt="icon"
         width={200}
         height={200}
         className="w-screen h-16 mt-[-20px] opacity-90"
       />
       <main className="py-9 flex items-center w-full bg-gray-50 px-4">
-        <div className="w-full  bg-white max-w-2xl mx-auto rounded-2xl shadow-sm p-8">
+        <div className="w-full bg-white max-w-2xl mx-auto rounded-2xl shadow-sm p-8">
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
               <div className="text-sm text-red-600 bg-red-50 p-3 rounded">

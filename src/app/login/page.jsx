@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { RxEyeOpen,RxEyeClosed } from "react-icons/rx";
+import { RxEyeOpen, RxEyeClosed } from "react-icons/rx";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
 import Image from "next/image";
@@ -14,7 +14,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
   // load saved email if remembered
@@ -28,13 +28,12 @@ export default function LoginPage() {
 
   const validate = () => {
     if (!email) return "Please enter your email.";
-    // simple email regex
     if (!/^\S+@\S+\.\S+$/.test(email)) return "Please enter a valid email.";
     if (!password) return "Please enter your password.";
     return null;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
 
@@ -47,20 +46,14 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      // Remember me logic (store email only)
       if (remember) localStorage.setItem("rememberedEmail", email);
       else localStorage.removeItem("rememberedEmail");
 
-      // TODO: replace with real API call
-      // Example:
-      // const res = await fetch("/api/auth/login", { method: "POST", body: JSON.stringify({ email, password }) })
-      // if (!res.ok) throw new Error("Invalid credentials");
-
-      // Simulated success
+      // Simulated API call
       await new Promise((r) => setTimeout(r, 700));
-      // redirect on success (adjust path to your app)
+
       router.push("/dashboard");
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
       setError(err?.message || "Login failed. Please try again.");
     } finally {
@@ -75,7 +68,7 @@ export default function LoginPage() {
         Log in
       </h1>
       <Image
-        src={"/images/image.svg"}
+        src="/images/image.svg"
         alt="icon"
         width={200}
         height={200}
@@ -100,7 +93,7 @@ export default function LoginPage() {
                 autoComplete="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-3 py-2  rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                className="w-full px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
                 placeholder="you@example.com"
                 required
               />
@@ -120,7 +113,7 @@ export default function LoginPage() {
                   autoComplete="current-password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-3 py-2  rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 pr-12"
+                  className="w-full px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 pr-12"
                   placeholder="Your password"
                   required
                 />
@@ -130,7 +123,7 @@ export default function LoginPage() {
                   onClick={() => setShowPassword((s) => !s)}
                   className="absolute right-2 top-1/2 -translate-y-1/2 text-sm text-gray-600 px-2 py-1 rounded"
                 >
-                  {showPassword ? <RxEyeOpen/> :<RxEyeClosed/> }
+                  {showPassword ? <RxEyeOpen /> : <RxEyeClosed />}
                 </button>
               </div>
             </div>

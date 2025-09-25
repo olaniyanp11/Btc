@@ -11,34 +11,23 @@ import {
   Area,
 } from "recharts";
 
-type CryptoRow = {
-  name: string;
-  price: string;
-  marketCap: string;
-};
-
-type ChartPoint = {
-  time: string;
-  price: number;
-};
-
-const ranges: { label: string; value: string }[] = [
+const ranges = [
   { label: "1h", value: "1h" },
   { label: "24h", value: "1" },
   { label: "7d", value: "7" },
   { label: "1m", value: "30" },
   { label: "6m", value: "180" },
   { label: "1y", value: "365" },
-  { label: "5y", value: "1825" }, // not native, but 5*365 works
+  { label: "5y", value: "1825" },
   { label: "max", value: "max" },
 ];
 
 export default function TwoColumnSection() {
-  const [tableData, setTableData] = useState<CryptoRow[]>([]);
-  const [chartData, setChartData] = useState<ChartPoint[]>([]);
-  const [range, setRange] = useState<string>("1"); // default 24h
+  const [tableData, setTableData] = useState([]);
+  const [chartData, setChartData] = useState([]);
+  const [range, setRange] = useState("1"); // default 24h
 
-  // ✅ Fetch table data (prices + market cap)
+  // Fetch table data (prices + market cap)
   useEffect(() => {
     const fetchTableData = async () => {
       try {
@@ -48,7 +37,7 @@ export default function TwoColumnSection() {
         if (!res.ok) throw new Error("Failed to fetch table data");
         const data = await res.json();
 
-        const formatted: CryptoRow[] = data.map((coin: any) => ({
+        const formatted = data.map((coin) => ({
           name: coin.name,
           price: `$${coin.current_price.toLocaleString()}`,
           marketCap: `$${coin.market_cap.toLocaleString()}`,
@@ -63,13 +52,12 @@ export default function TwoColumnSection() {
     fetchTableData();
   }, []);
 
-  // ✅ Fetch chart data depending on range
+  // Fetch chart data depending on range
   useEffect(() => {
     const fetchChartData = async () => {
       try {
         let url = `https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=${range}`;
 
-        // special case: 1h (simulate with minute data from 1 day)
         if (range === "1h") {
           url =
             "https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=1&interval=minute";
@@ -84,18 +72,16 @@ export default function TwoColumnSection() {
           return;
         }
 
-        const formatted: ChartPoint[] = data.prices.map(
-          (p: [number, number]) => ({
-            time:
-              range === "1" || range === "1h"
-                ? new Date(p[0]).toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })
-                : new Date(p[0]).toLocaleDateString(),
-            price: p[1],
-          })
-        );
+        const formatted = data.prices.map((p) => ({
+          time:
+            range === "1" || range === "1h"
+              ? new Date(p[0]).toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })
+              : new Date(p[0]).toLocaleDateString(),
+          price: p[1],
+        }));
 
         setChartData(formatted);
       } catch (err) {
@@ -111,7 +97,7 @@ export default function TwoColumnSection() {
       {/* Left Column - Video */}
       <div className="w-full">
         <video
-          src="/sample.mp4"
+          src="https://youtu.be/YYcwS98_L8s"
           controls
           autoPlay
           loop
