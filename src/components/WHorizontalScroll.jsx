@@ -1,40 +1,13 @@
 import Image from "next/image";
 import { CgArrowDown } from "react-icons/cg";
-/**
- * Monero Monero (XMR)
-$292.43  -6.7721 (-2.26%)
-XRP XRP (XRP)
-$2.8638  0.01589013 (0.56%)
-Solana Solana (SOL)
-$219.96  -3.0960 (-1.39%)
-Binance Coin Binance Coin (BNB)
-$1,018.70  -3.5358 (-0.35%)
-TRON TRON (TRX)
-$0.3360  -0.00514510 (-1.51%)
-Bitcoin Bitcoin (BTC)
-$112,996.24  157.10 (0.14%)
-Bitcoin Gold Bitcoin Gold (BTG)
-$1.1385  -0.3597 (-24.01%)
-Dash Dash (DASH)
-$21.26  0.1181 (0.56%)
-Ethereum Classic Ethereum Classic (ETC)
-$18.98  0.3605 (1.94%)
-Ethereum Ethereum (ETH)
-$4,195.52  -0.5932 (-0.01%)
-Litecoin Litecoin (LTC)
-$107.02  0.8289 (0.78%)
-Tether Tether (USDT)
-$1.0007  -0.00019117 (-0.02%)
 
- */
-// Coin data
 const coins = [
   {
     name: "Bitcoin",
     symbol: "BTC",
     price: "$113,000.89",
     change: "+216.31 (0.19%)",
-    changeType: "up", // up or down
+    changeType: "up",
     icon: "/images/bit.png",
   },
   {
@@ -42,7 +15,7 @@ const coins = [
     symbol: "BTG",
     price: "$1.1385",
     change: "-0.3597 (-24.01%)",
-    changeType: "down", // up or down
+    changeType: "down",
     icon: "/images/bit-g.png",
   },
   {
@@ -50,7 +23,7 @@ const coins = [
     symbol: "DASH",
     price: "$21.26",
     change: "+0.1181 (0.56%)",
-    changeType: "up", // up or down
+    changeType: "up",
     icon: "/images/dash.png",
   },
   {
@@ -127,16 +100,14 @@ const coins = [
   },
 ];
 
- 
-
-const HorizontalScroll = () => {
+const WHorizontalScroll = () => {
   return (
-    <div className="bg-primary py-2 px-1 w-full overflow-x-hidden text-white">
+    <div className="bg-white py-2  w-full overflow-x-hidden text-blue-600">
       <div className="flex animate-scroll hover:animate-none whitespace-nowrap">
         {coins.map((coin, i) => (
-          <div key={i} className="flex flex-col items-start px-2 ">
+          <div key={i} className="flex flex-col items-start px-3">
             {/* Coin Header */}
-            <div className="flex items-center text-sm mb-1">
+            <div className="flex items-center text-sm font-medium mb-1">
               <Image
                 src={coin.icon}
                 alt={coin.symbol}
@@ -151,8 +122,8 @@ const HorizontalScroll = () => {
             <div className="flex items-center space-x-2 text-sm">
               <span>{coin.price}</span>
               <span
-                className={`flex items-center ${
-                  coin.changeType === "up" ? "text-green-500" : "text-red-500"
+                className={`flex items-center font-semibold ${
+                  coin.changeType === "up" ? "text-green-600" : "text-red-600"
                 }`}
               >
                 <CgArrowDown
@@ -170,4 +141,4 @@ const HorizontalScroll = () => {
   );
 };
 
-export default HorizontalScroll;
+export default WHorizontalScroll;

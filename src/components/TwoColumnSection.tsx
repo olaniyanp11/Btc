@@ -1,13 +1,14 @@
 "use client";
+
 import { useEffect, useState } from "react";
 import {
-  LineChart,
-  Line,
   XAxis,
   YAxis,
   Tooltip,
   CartesianGrid,
   ResponsiveContainer,
+  AreaChart,
+  Area,
 } from "recharts";
 
 type CryptoRow = {
@@ -16,9 +17,26 @@ type CryptoRow = {
   marketCap: string;
 };
 
+type ChartPoint = {
+  time: string;
+  price: number;
+};
+
+const ranges: { label: string; value: string }[] = [
+  { label: "1h", value: "1h" },
+  { label: "24h", value: "1" },
+  { label: "7d", value: "7" },
+  { label: "1m", value: "30" },
+  { label: "6m", value: "180" },
+  { label: "1y", value: "365" },
+  { label: "5y", value: "1825" }, // not native, but 5*365 works
+  { label: "max", value: "max" },
+];
+
 export default function TwoColumnSection() {
   const [tableData, setTableData] = useState<CryptoRow[]>([]);
-  const [chartData, setChartData] = useState<any[]>([]);
+  const [chartData, setChartData] = useState<ChartPoint[]>([]);
+  const [range, setRange] = useState<string>("1"); // default 24h
 
   // ✅ Fetch table data (prices + market cap)
   useEffect(() => {
@@ -27,48 +45,66 @@ export default function TwoColumnSection() {
         const res = await fetch(
           "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=bitcoin,ethereum,dash,litecoin"
         );
+        if (!res.ok) throw new Error("Failed to fetch table data");
         const data = await res.json();
 
-        const formatted = data.map((coin: any) => ({
+        const formatted: CryptoRow[] = data.map((coin: any) => ({
           name: coin.name,
-          price: `$ ${coin.current_price.toLocaleString()}`,
-          marketCap: `$ ${coin.market_cap.toLocaleString()}`,
+          price: `$${coin.current_price.toLocaleString()}`,
+          marketCap: `$${coin.market_cap.toLocaleString()}`,
         }));
 
         setTableData(formatted);
       } catch (err) {
-        console.error("Error fetching table data:", err);
+        console.error("❌ Error fetching table data:", err);
       }
     };
 
     fetchTableData();
   }, []);
 
-  // ✅ Fetch chart data (Bitcoin last 24h)
+  // ✅ Fetch chart data depending on range
   useEffect(() => {
     const fetchChartData = async () => {
       try {
-        const res = await fetch(
-          "https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=1&interval=hourly"
-        );
+        let url = `https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=${range}`;
+
+        // special case: 1h (simulate with minute data from 1 day)
+        if (range === "1h") {
+          url =
+            "https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=1&interval=minute";
+        }
+
+        const res = await fetch(url);
+        if (!res.ok) throw new Error("Failed to fetch chart data");
         const data = await res.json();
 
-        const formatted = data.prices.map((p: [number, number]) => ({
-          time: new Date(p[0]).toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-          }),
-          price: p[1],
-        }));
+        if (!data.prices) {
+          console.error("⚠️ Chart data missing:", data);
+          return;
+        }
+
+        const formatted: ChartPoint[] = data.prices.map(
+          (p: [number, number]) => ({
+            time:
+              range === "1" || range === "1h"
+                ? new Date(p[0]).toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })
+                : new Date(p[0]).toLocaleDateString(),
+            price: p[1],
+          })
+        );
 
         setChartData(formatted);
       } catch (err) {
-        console.error("Error fetching chart data:", err);
+        console.error("❌ Error fetching chart data:", err);
       }
     };
 
     fetchChartData();
-  }, []);
+  }, [range]);
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
@@ -87,17 +123,48 @@ export default function TwoColumnSection() {
       {/* Right Column - Chart + Table */}
       <div className="flex flex-col space-y-6">
         {/* Chart */}
-        <div className="w-full h-64 bg-white rounded-xl shadow-md p-4">
-          <h2 className="text-lg font-bold mb-2">Bitcoin (24h)</h2>
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="time" hide />
-              <YAxis />
-              <Tooltip />
-              <Line type="monotone" dataKey="price" stroke="#2563eb" />
-            </LineChart>
-          </ResponsiveContainer>
+        <div className="w-full bg-white rounded-xl shadow-md p-4">
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="text-lg font-bold">Bitcoin</h2>
+            <div className="flex gap-2">
+              {ranges.map((r) => (
+                <button
+                  key={r.value}
+                  onClick={() => setRange(r.value)}
+                  className={`px-2 py-1 rounded text-sm ${
+                    range === r.value
+                      ? "bg-blue-600 text-white"
+                      : "bg-gray-100 text-gray-700"
+                  }`}
+                >
+                  {r.label}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={chartData}>
+                <defs>
+                  <linearGradient id="colorPrice" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#2563eb" stopOpacity={0.8} />
+                    <stop offset="95%" stopColor="#2563eb" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="time" />
+                <YAxis />
+                <Tooltip />
+                <Area
+                  type="monotone"
+                  dataKey="price"
+                  stroke="#2563eb"
+                  fillOpacity={1}
+                  fill="url(#colorPrice)"
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
         </div>
 
         {/* Table */}
