@@ -4,9 +4,11 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { RxEyeOpen, RxEyeClosed } from "react-icons/rx";
 import Nav from "@/components/Nav";
+import toast from "react-hot-toast";
 import Footer from "@/components/Footer";
 import Image from "next/image";
 import Link from "next/link";
+import { useAuth } from "@/Auth/AuthContext";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -16,7 +18,10 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const { user, login } = useAuth();
 
+  const dbUrl = process.env.NEXT_PUBLIC_DB_URL;
+  console.log("Database URL:", dbUrl);
   // load saved email if remembered
   useEffect(() => {
     const saved = localStorage.getItem("rememberedEmail");
@@ -46,15 +51,48 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
+      // remember email
       if (remember) localStorage.setItem("rememberedEmail", email);
       else localStorage.removeItem("rememberedEmail");
 
-      // Simulated API call
-      await new Promise((r) => setTimeout(r, 700));
+      // build payload from state
+      const payload = {
+        email,
+        password,
+      };
 
-      router.push("/dashboard");
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_DB_URL}/login.php`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+          credentials: "include", // needed for PHP session
+        }
+      );
+
+      const data = await response.json();
+      console.log(data);
+
+      if (response.ok && data.success) {
+        login(data);
+        toast.success(" Logged in successfully, redirecting...");
+        setTimeout(() => {
+          if (data.user.role === "admin") {
+            router.push("/admin");
+          } else {
+            router.push("/dashboard");
+          }
+        }, 100);
+      } else {
+        toast.error(data.message || "Invalid email or password");
+        setError(data.message || "Login failed.");
+      }
     } catch (err) {
-      console.error(err);
+      console.error("Login error:", err);
+      toast.error("Something went wrong: " + err.message);
       setError(err?.message || "Login failed. Please try again.");
     } finally {
       setLoading(false);
@@ -89,11 +127,12 @@ export default function LoginPage() {
               </label>
               <input
                 id="email"
+                name="email"
                 type="email"
                 autoComplete="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                className="w-full px-3 py-2 rounded-md border border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
                 placeholder="you@example.com"
                 required
               />
@@ -109,11 +148,12 @@ export default function LoginPage() {
               <div className="relative">
                 <input
                   id="password"
+                  name="password"
                   type={showPassword ? "text" : "password"}
                   autoComplete="current-password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 pr-12"
+                  className="w-full px-3 py-2 rounded-md border border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400 pr-12"
                   placeholder="Your password"
                   required
                 />
@@ -152,7 +192,7 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-[100px] bg-blue-600 text-white py-2 rounded-md font-medium hover:bg-blue-700 disabled:opacity-60"
+                className="w-[100px] bg-blue-600 text-white py-2 rounded-md border border-blue-400 font-medium hover:bg-blue-700 disabled:opacity-60"
               >
                 {loading ? "Signing in..." : "Sign in"}
               </button>

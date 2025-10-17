@@ -96,13 +96,12 @@ export default function TwoColumnSection() {
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
       {/* Left Column - Video */}
       <div className="w-full">
-        <video
-          src="https://youtu.be/YYcwS98_L8s"
-          controls
-          autoPlay
-          loop
-          muted
-          className="rounded-xl shadow-lg w-full"
+        <iframe
+          src="https://www.youtube.com/embed/YYcwS98_L8s?autoplay=1&mute=1&loop=1&controls=1&playlist=YYcwS98_L8s"
+          title="YouTube video player"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowFullScreen
+          className="rounded-xl shadow-lg w-full h-64 md:h-full"
         />
       </div>
 

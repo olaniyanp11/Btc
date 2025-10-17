@@ -52,11 +52,11 @@ const InvestmentPlan = () => {
   return (
     <div className="w-full bg-white px-3 text-primary py-32 text-2xl md:text-5xl font-bold text-center">
       <h1 className="text-primary">Investment Plans</h1>
-      <div className="grid grid-cols-1 md:grid-cols-3  mt-10  space-y-5 items-center justify-center">
+      <div className="grid grid-cols-1 md:grid-cols-3 pt-10  gap-y-5  items-center justify-center">
         {plans.map((plan, index) => (
           <section
             key={index}
-            className="bg-primary py-6 shadow-md flex flex-col items-center"
+            className="bg-primary py-6 shadow-md flex flex-col items-center "
           >
             <Image
               src="/images/plan.png"

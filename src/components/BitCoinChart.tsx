@@ -32,24 +32,20 @@ const BitcoinChart = () => {
     const fetchData = async () => {
       try {
         const res = await fetch(
-          "https://api.coingecko.com/api/v3/coins/bitcoin/ohlc?vs_currency=usd&days=1"
+          "https://api.coingecko.com/api/v3/coins/bitcoin/ohlc?vs_currency=usd&days=365"
         );
         if (!res.ok) throw new Error("Failed to fetch chart data");
-        const data = await res.json();
+        const data: [number, number, number, number, number][] =
+          await res.json();
 
-        const formatted: OHLCPoint[] = data.map(
-          (d: [number, number, number, number, number]) => ({
-            date: new Date(d[0]).toLocaleTimeString([], {
-              hour: "2-digit",
-              minute: "2-digit",
-            }),
-            open: d[1],
-            high: d[2],
-            low: d[3],
-            close: d[4],
-            price: d[4], // for area chart
-          })
-        );
+        const formatted: OHLCPoint[] = data.map((d) => ({
+          date: new Date(d[0]).toLocaleDateString(),
+          open: d[1],
+          high: d[2],
+          low: d[3],
+          close: d[4],
+          price: d[4], // for area chart
+        }));
 
         setChartData(formatted);
       } catch (err) {
@@ -59,6 +55,7 @@ const BitcoinChart = () => {
 
     fetchData();
   }, []);
+
 
   return (
     <section className="max-w-6xl mx-auto px-6 py-12">

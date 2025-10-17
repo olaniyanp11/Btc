@@ -78,7 +78,7 @@ const Nav = () => {
           <Dropdown
             label="Documents"
             items={[
-              { label: "Docs Home", href: "/docs" },
+              { label: "About Us", href: "/about" },
               { label: "privacy Policy", href: "/privacy-policy" },
               { label: "Terms and conditions", href: "/terms-and-conditions" },
             ]}
@@ -170,7 +170,7 @@ const Nav = () => {
                     transition={{ duration: 0.3 }}
                     className="ml-4 flex flex-col space-y-2 overflow-hidden"
                   >
-                    <Link href="/docs">Docs Home</Link>
+                    <Link href="/about">About Us</Link>
                     <Link href="/privacy-policy">privacy Policy</Link>
                     <Link href="/terms-and-conditions">Terms and conditions</Link>
                   </motion.div>

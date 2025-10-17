@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { RxEyeOpen, RxEyeClosed } from "react-icons/rx";
+import toast from "react-hot-toast"; // <-- import toast
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
 import Image from "next/image";
@@ -12,19 +13,59 @@ export default function RegisterPage() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const dburl = process.env.NEXT_PUBLIC_DB_URL;
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
+ const handleSubmit = async (e: React.FormEvent) => {
+   e.preventDefault();
+   setLoading(true);
 
-    try {
-      // TODO: connect API
-      await new Promise((r) => setTimeout(r, 800));
-      router.push("/dashboard");
-    } finally {
-      setLoading(false);
-    }
-  };
+   try {
+     const form = e.target as HTMLFormElement;
+     const formData = new FormData(form);
+
+     // convert FormData → plain object → JSON
+     const payload = {
+       username: formData.get("username"),
+       email: formData.get("email"),
+       phone: formData.get("phone"),
+       password: formData.get("password"),
+       bitcoin_address: formData.get("bitcoin_address"),
+       country: formData.get("country"),
+     };
+
+     const response = await fetch("http://localhost/btc/api/create_user.php", {
+       method: "POST",
+       headers: {
+         "Content-Type": "application/json",
+       },
+       body: JSON.stringify(payload),
+       credentials: "include", // keep for PHP session cookies
+     });
+
+     const data = await response.json();
+
+     if (response.ok && data.success) {
+       // ✅ Show success popup
+       console.log("User created:", data.user);
+       toast.success("User created successfully Redirecting...")
+       router.push('/login')
+      } else {
+       // ❌ Show error popup
+       console.error("Error:", data.message);
+       toast.error(data.message)
+     }
+   } catch (err) {
+     console.error("Request failed:", err);
+     if (err instanceof Error) {
+       toast.error(err.message);
+     } else {
+       toast.error("An unexpected error occurred.");
+     }
+   } finally {
+     setLoading(false);
+   }
+ };
+
 
   return (
     <>
@@ -50,8 +91,9 @@ export default function RegisterPage() {
               </label>
               <input
                 type="text"
+                name="username"
                 required
-                className="w-full px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                className="w-full px-3 py-2 rounded-md border border-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-400"
                 placeholder="Enter your username"
               />
             </div>
@@ -63,8 +105,9 @@ export default function RegisterPage() {
               </label>
               <input
                 type="email"
+                name="email"
                 required
-                className="w-full px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                className="w-full px-3 py-2 rounded-md border border-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-400"
                 placeholder="you@example.com"
               />
             </div>
@@ -76,8 +119,9 @@ export default function RegisterPage() {
               </label>
               <input
                 type="tel"
+                name="phone"
                 required
-                className="w-full px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                className="w-full px-3 py-2 rounded-md border border-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-400"
                 placeholder="+234 801 234 5678"
               />
             </div>
@@ -90,8 +134,9 @@ export default function RegisterPage() {
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
+                  name="password"
                   required
-                  className="w-full px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 pr-12"
+                  className="w-full px-3 py-2 rounded-md border border-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-400 pr-12"
                   placeholder="Your password"
                 />
                 <button
@@ -112,8 +157,9 @@ export default function RegisterPage() {
               </label>
               <input
                 type="text"
+                name="bitcoin_address"
                 required
-                className="w-full px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                className="w-full px-3 py-2 rounded-md border border-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-400"
                 placeholder="Your BTC address"
               />
             </div>
@@ -125,7 +171,8 @@ export default function RegisterPage() {
               </label>
               <select
                 required
-                className="w-full px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                name="country"
+                className="w-full px-3 py-2 rounded-md border border-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-400"
               >
                 <option value="">Select a country</option>
                 <option value="Afghanistan">Afghanistan</option>
@@ -303,7 +350,7 @@ export default function RegisterPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-blue-600 text-white py-2 rounded-md font-medium hover:bg-blue-700 disabled:opacity-60"
+                className="w-full bg-blue-600 text-white py-2 rounded-md border border-blue-200 font-medium hover:bg-blue-700 disabled:opacity-60"
               >
                 {loading ? "Registering..." : "Register"}
               </button>
